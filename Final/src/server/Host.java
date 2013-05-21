@@ -4,13 +4,16 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Queue;
 
 
@@ -27,9 +30,11 @@ public class Host implements Runnable  {
 	private OutputStream out = null;    // Client's output data stream
 	private BufferedReader br = null;   // Buffered reader to allow easier reading through streams
 	private BufferedWriter bf = null;   // same
-
-	private int sleep;
-	private boolean realtime;
+ 
+	private int sleep;                  // Time in milliseconds between sensor reads
+	private boolean realtime;           // True for sending real-time data to client
+	private String dtFormat;            // Format for date/time display
+	private String tempFormat;          // f = Fahrenheit c = Celsius
 
 	private boolean stop;      // Used to stop thread execution
 	private boolean clientDC;  // True if unable to write to client
@@ -141,11 +146,12 @@ public class Host implements Runnable  {
 			bos.write(baos.toByteArray());
 			bos.flush();
 			bos.close();
-			System.out.println("Wrote File");
+			System.out.println("Copied Configuration File From Client");
 		} catch (IOException ex) {
 			// Do exception handling
 		}
 
+		// setInitialConfig();
 		// TODO: Test Values Remove Later
 		sleep = 1000;
 		realtime = true;
@@ -160,11 +166,51 @@ public class Host implements Runnable  {
 
 		this.stop = false;
 	}
+	
+	private void setInitialConfig(String file) throws FileNotFoundException {
+		
+		FileReader fis = new FileReader(file);
+		BufferedReader br = new BufferedReader(fis);
+		ArrayList<String> config = new ArrayList<String>();
+		String value;
+		
+		try {
+			while (br.ready()) {
+				config.add(br.readLine());
+			}
+			
+			// Parse through list assigning initial values
+			// Each initial value must be on a separate line in the file
+		    // and contain a leading + at the beginning of the line.
+			// If it does not contain a + the line is skipped.
+			// The value must also be separated by a colon (:)
+			for (int i = 0; i < config.size(); i++) {
+				value = config.get(i);
+				if (value.startsWith("+")) {
+					if (value.contains("dtFormat")) {
+						setDtFormat(value.substring(value.indexOf(":"), value.length()));
+					} else if (value.contains("tempFormat")) {
+						setTempFormat(value.substring(value.indexOf(":"), value.length()));
+					} else if (value.contains("realtime")) {
+						if (value.substring(value.indexOf(":"), value.length()).equals("true")) {
+							setRealtime(true);
+						} else {
+							setRealtime(false);
+						}
+					} else if (value.contains("sleep")) {
+						setSleep(Integer.valueOf(value.substring(value.indexOf(":"), value.length())));
+					}
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("I/O error in setInitialConfig().");
+		}
+	}
 
 	/**
 	 * The value of reset is tested to ensure updates take effect.
 	 * <br><br>
-	 * Set <b>true</b> if updates have occured.
+	 * Set <b>true</b> if updates have occurred.
 	 * @param reset - boolean
 	 */
 	public void setReset(boolean reset) {
@@ -235,5 +281,21 @@ public class Host implements Runnable  {
 	 */
 	public void setStop(boolean stop) {
 		this.stop = stop;
+	}
+
+	public String getDtFormat() {
+		return dtFormat;
+	}
+
+	public void setDtFormat(String dtFormat) {
+		this.dtFormat = dtFormat;
+	}
+
+	public String getTempFormat() {
+		return tempFormat;
+	}
+
+	public void setTempFormat(String tempFormat) {
+		this.tempFormat = tempFormat;
 	}
 }

@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -12,6 +13,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DecimalFormat;
+
+import org.jfree.ui.RefineryUtilities;
 
 public class Client implements Runnable {
 
@@ -24,10 +28,10 @@ public class Client implements Runnable {
 
 	public static void main(String[] args) throws IOException {
 
-
+		String ip = "131.191.106.216"; /// Put the ip InetAddress.getByName(ip)
 
 		try {
-			kkSocket = new Socket("localhost", 4444);
+			kkSocket = new Socket("localhost", 61223);
 			in = new BufferedReader(new InputStreamReader(kkSocket.getInputStream()));
 			out = new BufferedWriter(new OutputStreamWriter(kkSocket.getOutputStream()));
 		} catch (UnknownHostException e) {
@@ -46,6 +50,15 @@ public class Client implements Runnable {
 		kkSocket.getOutputStream().flush();
 		out.newLine();
 		String input = "";
+
+		// Opens chart
+		RTGraph graph = new RTGraph("Real-Time Data Graph");
+		graph.setPreferredSize(new Dimension(600, 500));
+        graph.pack();
+        RefineryUtilities.centerFrameOnScreen(graph);
+        graph.setVisible(true);
+        graph.start();
+        
 		while (!closed) {
 			input = in.readLine();
 			
@@ -55,8 +68,17 @@ public class Client implements Runnable {
 			
 			if (input.equals("b")) {
 				
+				
+				
 			} else {
-				System.out.println(input);
+				try {
+					float test = Float.parseFloat(input);
+					String data = new DecimalFormat("0.00").format(test);
+					graph.setTempValue(Float.parseFloat(data));
+					System.out.println(input);
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			}
 		}
 
@@ -72,6 +94,8 @@ public class Client implements Runnable {
 			InputStreamReader ir = new InputStreamReader(System.in);
 			BufferedReader buff = new BufferedReader(ir);
 			String input = "";
+            
+            // Loop for getting data from server
 			while (!input.equals("disconnect")) {
 				input = buff.readLine();
 				System.out.println(input);

@@ -1,5 +1,4 @@
 package server;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,11 +13,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class Server implements Runnable {
 
-	private static int MAX_CLIENT_TIMEOUT = 20000;
+	private static int MAX_CLIENT_TIMEOUT = 20000;   // Timeout 20 seconds
 	private static Queue<String> tempQueue = null;
 	private ServerSocket serverSocket = null;
 	private Socket clientSocket = null;
@@ -44,7 +42,7 @@ public class Server implements Runnable {
 	// Send data to client, listen for updates, etc.
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(4444);
+			serverSocket = new ServerSocket(61223);
 			while (true) {
 				disconnected = false;
 				System.out.println("Waiting for client"); //TODO: Remove later
@@ -138,7 +136,6 @@ public class Server implements Runnable {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
