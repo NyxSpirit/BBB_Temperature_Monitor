@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -23,8 +24,7 @@ import org.jfree.data.time.Second;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 
-/** @see http://stackoverflow.com/questions/5048852 */
-public class RTGraph extends ApplicationFrame {
+public class RTGraph extends JFrame {
 
     private static final String TITLE = "Realtime Temperature";
     private static final String START = "Start";
@@ -42,7 +42,7 @@ public class RTGraph extends ApplicationFrame {
         final DynamicTimeSeriesCollection dataset =
             new DynamicTimeSeriesCollection(1, COUNT, new Second());
         dataset.setTimeBase(new Second(0, 0, 0, 1, 1, 2013));
-        dataset.addSeries(gaussianData(), 0, null);
+        dataset.addValue(0, 0, 0);
         JFreeChart chart = createChart(dataset);
         chart.removeLegend();
 
@@ -116,14 +116,6 @@ public class RTGraph extends ApplicationFrame {
 
 	private float randomValue() {
         return (float) (random.nextGaussian() * MINMAX / 3);
-    }
-
-    private float[] gaussianData() {
-        float[] a = new float[COUNT];
-        for (int i = 0; i < a.length; i++) {
-            a[i] = randomValue();
-        }
-        return a;
     }
 
     private JFreeChart createChart(final XYDataset dataset) {

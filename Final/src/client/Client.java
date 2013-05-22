@@ -1,144 +1,144 @@
 package client;
+import java.awt.Cursor;
+import java.awt.EventQueue;
 
-import java.awt.Dimension;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.text.DecimalFormat;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.awt.Font;
+import javax.swing.JButton;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-import org.jfree.ui.RefineryUtilities;
 
-public class Client implements Runnable {
+public class Client {
 
-	static Socket kkSocket = null;
-	PrintWriter pw = null;
-	static BufferedReader in = null;
-	static BufferedWriter out = null;
-	static Thread client = null;
-	private static boolean closed;
+	private JFrame frame;
+	private ClientProcess cp;
 
-	public static void main(String[] args) throws IOException {
+	private Thread client;
 
-		String ip = "131.191.106.216"; /// Put the ip InetAddress.getByName(ip)
-
-		try {
-			kkSocket = new Socket("localhost", 61223);
-			in = new BufferedReader(new InputStreamReader(kkSocket.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(kkSocket.getOutputStream()));
-		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host: taranis.");
-			System.exit(1);
-		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for the connection to: taranis.");
-			System.exit(1);
-		}
-
-		sendFile(kkSocket);
-		client = new Thread(new Client(), "Client");
-		System.out.println("Created client thread");
-		client.start();
-
-		kkSocket.getOutputStream().flush();
-		out.newLine();
-		String input = "";
-
-		// Opens chart
-		RTGraph graph = new RTGraph("Real-Time Data Graph");
-		graph.setPreferredSize(new Dimension(600, 500));
-        graph.pack();
-        RefineryUtilities.centerFrameOnScreen(graph);
-        graph.setVisible(true);
-        graph.start();
-        
-		while (!closed) {
-			input = in.readLine();
-			
-			if (input == null) {
-				break;
-			}
-			
-			if (input.equals("b")) {
-				
-				
-				
-			} else {
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
 				try {
-					float test = Float.parseFloat(input);
-					String data = new DecimalFormat("0.00").format(test);
-					graph.setTempValue(Float.parseFloat(data));
-					System.out.println(input);
+					Client window = new Client();
+					window.frame.setVisible(true);
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+					e.printStackTrace();
 				}
 			}
-		}
-
-		// Stream is a holding tank, need to send the text, create a line, and then flush the stream
-		// Can send data to the server by this method
-		in.close();
-		kkSocket.close();
+		});
 	}
 
-	public void run() {
-		// TODO Auto-generated method stub
-		try {
-			InputStreamReader ir = new InputStreamReader(System.in);
-			BufferedReader buff = new BufferedReader(ir);
-			String input = "";
-            
-            // Loop for getting data from server
-			while (!input.equals("disconnect")) {
-				input = buff.readLine();
-				System.out.println(input);
-				out.write(input);
-				out.newLine();
-				out.flush();
-			}
-			//closed = true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-
-		}
+	/**
+	 * Create the application.
+	 */
+	public Client() {
+		initialize();
 	}
 
-	public static void sendFile(Socket client) throws IOException {
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame();
+		frame.setBounds(100, 100, 304, 300);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
 
-		String iniFile = "temp.ini";
-		File file = new File(iniFile);
-		byte[] bArray = new byte[(int) file.length()];
-		FileInputStream fis = null;
-		fis = new FileInputStream(file);
-		// Sending a file
-		BufferedInputStream bis = new BufferedInputStream(fis);
-		BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+		JPanel panel = new JPanel();
+		panel.setBounds(0, 0, 288, 262);
+		frame.getContentPane().add(panel);
+		panel.setLayout(null);
 
-		// Send the file size
-		System.out.println((int) file.length());
-		bos.write((int) file.length());
-		bos.flush();
+		JLabel lblNewLabel = new JLabel("T.R.U. Temperature Client");
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setBounds(10, 11, 268, 59);
+		panel.add(lblNewLabel);
 
-		if (in.readLine().equals("1")) {
-			System.out.println("1");
-			try {
-				bis.read(bArray, 0, bArray.length);
-				bos.write(bArray, 0, bArray.length);
-				bos.flush();
+		final JLabel lblStatus = new JLabel("Disconnected");
+		lblStatus.setForeground(Color.RED);
+		lblStatus.setBounds(129, 96, 81, 14);
+		panel.add(lblStatus);
 
-				// File sent
-			} catch (IOException ex) {
-				// Do exception handling
+		final JButton btnConnect = new JButton("Connect");
+		final JButton btnDisconnect = new JButton("Disconnect");
+		final JButton btnReal = new JButton("Real-Time");
+		
+
+		btnConnect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (btnConnect.getText().equals("Connect")) {
+					cp = new ClientProcess("localhost", 61223);
+					client = new Thread(cp);
+					try {
+						frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						cp.connect();
+						client.start();
+						btnConnect.setVisible(false);
+						btnDisconnect.setVisible(true);
+						lblStatus.setForeground(Color.GREEN);
+						lblStatus.setText("Connected");
+						btnReal.setEnabled(true);
+						frame.repaint();
+					} catch (Exception e) {
+						System.out.println(e.getMessage());
+					} finally {
+						frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					}
+				}
 			}
-		}
+		});
+		btnConnect.setBounds(84, 120, 116, 23);
+		panel.add(btnConnect);
+		btnDisconnect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					cp.disconnect();
+					btnDisconnect.setVisible(false);
+					btnConnect.setVisible(true);
+					lblStatus.setForeground(Color.RED);
+					lblStatus.setText("Disconnected");
+					btnReal.setEnabled(false);
+					frame.repaint();
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				} finally {
+					frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			}
+		});
+		btnDisconnect.setBounds(84, 120, 116, 23);
+		btnDisconnect.setVisible(false);
+		panel.add(btnDisconnect);
+		
+		btnReal.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cp.setReal(true);
+			}
+		});
+		btnReal.setEnabled(false);
+		btnReal.setBounds(84, 154, 116, 23);
+		panel.add(btnReal);
+
+		JLabel lblNewLabel_1 = new JLabel("Status :");
+		lblNewLabel_1.setBounds(84, 96, 52, 14);
+		panel.add(lblNewLabel_1);
+
+		JButton btnNewButton = new JButton("Open Log");
+		btnNewButton.setBounds(84, 188, 116, 23);
+		panel.add(btnNewButton);
+
+		JButton btnNewButton_1 = new JButton("Exit");
+		btnNewButton_1.setBounds(84, 222, 116, 23);
+		panel.add(btnNewButton_1);
 	}
 }

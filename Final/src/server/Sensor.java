@@ -72,7 +72,7 @@ public class Sensor implements Runnable {
 	}
 	
 	/**
-	 * Reads the data from the sensor on the Beagle Bone Black.
+	 * Reads the data from the temperature sensor.
 	 * <br><br>
 	 * The value obtained from the sensor is sent to a worker thread through
 	 * the java executor service where it is sent to the client as a String.
@@ -84,8 +84,8 @@ public class Sensor implements Runnable {
 	 */
 	private void readSensor() {
 		
-		int rangeMin = -80;
-		int rangeMax = 136;
+		int rangeMin = 68;
+		int rangeMax = 74;
 		// Get the data
 		Random r = new Random();
 		double randomValue = rangeMin + (rangeMax - rangeMin) * r.nextDouble();
