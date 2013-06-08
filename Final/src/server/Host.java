@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -28,7 +27,6 @@ public class Host implements Runnable  {
 
 	private InputStream in = null;      // Client's input data stream
 	private OutputStream out = null;    // Client's output data stream
-	private BufferedReader br = null;   // Buffered reader to allow easier reading through streams
 	private BufferedWriter bf = null;   // same
  
 	private int sleep;                  // Time in milliseconds between sensor reads
@@ -37,7 +35,6 @@ public class Host implements Runnable  {
 	private String tempFormat;          // f = Fahrenheit c = Celsius
 
 	private boolean stop;      // Used to stop thread execution
-	private boolean clientDC;  // True if unable to write to client
 
 	// Classes to be made into threads
 	private Sensor se = null;
@@ -84,6 +81,7 @@ public class Host implements Runnable  {
 				if (reset) {
 					se.setRealtime(realtime);
 					se.setSleep(sleep);
+					setReset(false);
 				}
 				Thread.sleep(500);
 			}
@@ -110,11 +108,11 @@ public class Host implements Runnable  {
 		// Open and set the streams to the client
 		in = clientSocket.getInputStream();
 		out = clientSocket.getOutputStream();
-		br = new BufferedReader(new InputStreamReader(in));   // Converts bytes to characters
 		bf = new BufferedWriter(new OutputStreamWriter(out)); // Writing to client
 
 		// For file handling
 		byte[] aByte = new byte[1];
+		@SuppressWarnings("unused")
 		int bytesRead;
 		String outFile = "tempout.ini";
 
@@ -151,13 +149,11 @@ public class Host implements Runnable  {
 			// Do exception handling
 		}
 
-		// setInitialConfig();
-		// TODO: Test Values Remove Later
-		sleep = 1000;
-		realtime = true;
+		// Test Values Remove Later
+		setInitialConfig(outFile);
 
 		// Create the instance of the sensor
-		se = new Sensor(queue, bf, sleep, realtime);
+		se = new Sensor(queue, bf, this.sleep, this.realtime);
 		sensor = new Thread(se, "Sensor");
 
 		// Create the instance of the file writer
@@ -188,22 +184,29 @@ public class Host implements Runnable  {
 				value = config.get(i);
 				if (value.startsWith("+")) {
 					if (value.contains("dtFormat")) {
-						setDtFormat(value.substring(value.indexOf(":"), value.length()));
+						setDtFormat(value.substring(value.indexOf(":")+1, value.length()));
 					} else if (value.contains("tempFormat")) {
-						setTempFormat(value.substring(value.indexOf(":"), value.length()));
+						setTempFormat(value.substring(value.indexOf(":")+1, value.length()));
 					} else if (value.contains("realtime")) {
-						if (value.substring(value.indexOf(":"), value.length()).equals("true")) {
+						if (value.substring(value.indexOf(":")+1, value.length()).equals("true")) {
 							setRealtime(true);
 						} else {
 							setRealtime(false);
 						}
 					} else if (value.contains("sleep")) {
-						setSleep(Integer.valueOf(value.substring(value.indexOf(":"), value.length())));
+						setSleep(Integer.valueOf(value.substring(value.indexOf(":")+1, value.length())));
 					}
 				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException("I/O error in setInitialConfig().");
+		} finally {
+			try {
+				br.close();
+				fis.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -297,5 +300,38 @@ public class Host implements Runnable  {
 
 	public void setTempFormat(String tempFormat) {
 		this.tempFormat = tempFormat;
+	}
+
+	public void sendDataToClient(String dateTime) throws IOException {
+		String dateTimeData = getDateTimeData(dateTime);
+		bf.write("d");
+		bf.newLine();
+		bf.flush();
+		bf.write(dateTimeData);
+		bf.newLine();
+		bf.flush();
+	}
+
+	private String getDateTimeData(String dateTime) {
+		String dateTimeData = "";
+		String [] sTimes = dateTime.split(",");
+		
+		// Order:
+		// Start Hour, Start Min, End Hour, End Min, Start Day, Start Year, End Day, End Year
+		
+		// Open File and Search for the date and times with their values
+		dateTimeData = getDataFromFile(sTimes);
+		
+		return dateTimeData;
+	}
+
+	private String getDataFromFile(String[] sTimes) {
+		String dateTimeData = "";
+		for (int i = 0; i < sTimes.length; i++) {
+			dateTimeData += sTimes[i];
+		}
+		
+		// TODO Open File, Search for date/times, save to single string, return
+		return dateTimeData;
 	}
 }

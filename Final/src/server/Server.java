@@ -45,7 +45,7 @@ public class Server implements Runnable {
 			serverSocket = new ServerSocket(61223);
 			while (true) {
 				disconnected = false;
-				System.out.println("Waiting for client"); //TODO: Remove later
+				System.out.println("Waiting for client");
 				// Wait for a client to connect
 				clientSocket = serverSocket.accept();
 				System.out.println("Client Connected");
@@ -86,7 +86,7 @@ public class Server implements Runnable {
 						f = ex.submit(new Heartbeat(bf));
 
 						// The get() will attempt to get an object, but nothing returned.
-						// This will ensure the exception from the Heartbeat Runnable is caught in Server
+						// This will ensure the exception from the Heart beat Runnable is caught in Server
 						f.get();
 
 						// If the host process hasn't been started then start it
@@ -101,10 +101,19 @@ public class Server implements Runnable {
 							// Get the command
 							command = br.readLine();
 							System.out.println(command);
-
+							
 							// Do the command and remember to host.setReset(true) when updating sleep/reads/real-time
 							//TODO: Write the proper command thing here, do it in a separate method easier handling
-
+							if (command.equals("sr")) {
+								host.setSleep(Integer.parseInt(br.readLine()));
+								host.setReset(true);
+							}
+							if (command.equals("getData")) {
+								host.setRealtime(false);
+								String dateTime = br.readLine();
+								host.sendDataToClient(dateTime);
+								host.setRealtime(true);
+							}
 							/*
 							 * Client sending the disconnect request to the server. 
 							 * Must shut down the threads and ensure no data lost.

@@ -1,8 +1,6 @@
 package server;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -17,11 +15,10 @@ public class Sensor implements Runnable {
 	private final BufferedWriter bf; // For realtime temp data flow
 	private int sleep;               // How often the sensor data is read
 	private boolean realtime;        // If the sensor is in realtime mode
-	private double temp;             // Holds the volatile temperature data
 	
 	private boolean stop;
 	
-	private boolean readError;       // Used for the sensor read, True if there is an error
+	// private boolean readError;       // Used for the sensor read, True if there is an error
 	
 	/**
 	 * Creates a new Sensor Thread that will read data from the temperature sensor on the 
@@ -39,7 +36,7 @@ public class Sensor implements Runnable {
 		this.bf = bf;
 		this.sleep = sleep;
 		this.realtime = realtime;
-		this.readError = false;
+		// this.readError = false;
 		this.queue = queue;
 		this.stop = false;
 		this.ex = Executors.newSingleThreadExecutor();
@@ -60,6 +57,7 @@ public class Sensor implements Runnable {
 				 */
 			}
 		}
+		
 		// Clean up the thread
 		ex.shutdown();
 		
@@ -67,8 +65,6 @@ public class Sensor implements Runnable {
 		synchronized (queue) {
             queue.notifyAll();
         }
-		
-		System.out.println("Sensor stopped");
 	}
 	
 	/**
@@ -96,7 +92,7 @@ public class Sensor implements Runnable {
 		}
 		
 		// Format data with time-stamp
-		String data = new DecimalFormat("0.00").format(randomValue);
+		// String data = new DecimalFormat("0.00").format(randomValue);
 		
 		// Create proper readout and put it in the queue
 		queue.add(new Readout(randomValue).toString());

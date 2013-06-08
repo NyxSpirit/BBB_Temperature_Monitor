@@ -10,40 +10,47 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 
-import javax.swing.JFrame;
+import javax.swing.JTextField;
 
 import org.jfree.ui.RefineryUtilities;
 
 public class ClientProcess implements Runnable {
 
-	private static final String IP = "131.191.106.216";
+	//private static final String IP = "131.191.106.216";
 
 	private Socket kkSocket = null;
-	private PrintWriter pw = null;
 	private BufferedReader in = null;
 	private BufferedWriter out = null;
-	private Thread client = null;
 	private boolean closed;
 	private boolean real;
+
+	private String degree;
 	
+	private File inFile;
+
+	// Pointers for interactions between components in other classes
+	private JTextField txtTemp;
+
 	private RTGraph graph;
 
 	private String ip = "131.191.106.216"; /// Put the ip InetAddress.getByName(ip)
 	private int port;
+	private String dateTimeData;
 
-	public ClientProcess(String ip, int port) {
+	public ClientProcess(String ip, int port, JTextField txtTemp, String degree) {
 		this.ip = ip;
 		this.port = port;
+		this.txtTemp = txtTemp;
+		this.degree = degree;
+		this.dateTimeData = "";
 	}
 
 	public void run() {
-		// TODO Auto-generated method stub
 		try {
 			out.newLine();
 			String input = "";
@@ -60,21 +67,28 @@ public class ClientProcess implements Runnable {
 			// Loop for getting data from server
 			while (!closed) {
 				input = in.readLine();
-				
+
 				if (input == null) {
-					break;
+					//break;
 				}
-
-				if (input.equals("b")) {
-
-
-
+				
+				if (input.equals("d")) {
+					String dt = in.readLine();
+					graphCustom(dt);
+				} else if (input.equals("b")) {
+					
 				} else {
 					try {
 						float test = Float.parseFloat(input);
+
+						// Check for degree
+						if (getDegree().equals("C")) {
+							test = convertToC(test);
+						}
 						String data = new DecimalFormat("0.00").format(test);
+						txtTemp.setText(data);
 						graph.setTempValue(Float.parseFloat(data));
-						System.out.println(input);
+						//System.out.println(input);
 					} catch (Exception e) {
 						System.out.println(e.getMessage());
 					}
@@ -82,11 +96,14 @@ public class ClientProcess implements Runnable {
 			}
 			disconnect();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		} finally {
 
 		}
+	}
+
+	private float convertToC(float test) {
+		return (float) ((test - 32.0) * (5.0 / 9.0));
 	}
 
 	public void connect() throws UnknownHostException, IOException {
@@ -102,37 +119,46 @@ public class ClientProcess implements Runnable {
 		// Stream is a holding tank, need to send the text, create a line, and then flush the stream
 		// Can send data to the server by this method
 		this.closed = true;
-		in.close();
+		kkSocket.shutdownOutput();
+		kkSocket.shutdownInput();
 		kkSocket.close();
 	}
 
 	public void sendFile(Socket client) throws IOException {
-
-		String iniFile = "temp.ini";
-		File file = new File(iniFile);
-		byte[] bArray = new byte[(int) file.length()];
+		BufferedInputStream bis = null;
+		BufferedOutputStream bos = null;
 		FileInputStream fis = null;
-		fis = new FileInputStream(file);
-		// Sending a file
-		BufferedInputStream bis = new BufferedInputStream(fis);
-		BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
 
-		// Send the file size
-		System.out.println((int) file.length());
-		bos.write((int) file.length());
-		bos.flush();
+		try {
+			File file = getInFile();
+			byte[] bArray = new byte[(int) file.length()];
+			fis = null;
+			fis = new FileInputStream(file);
+			// Sending a file
+			bis = new BufferedInputStream(fis);
+			bos = new BufferedOutputStream(client.getOutputStream());
 
-		if (in.readLine().equals("1")) {
-			System.out.println("1");
-			try {
+			// Send the file size
+			System.out.println((int) file.length());
+			bos.write((int) file.length());
+			bos.flush();
+
+
+			// If the server is ready for the file
+			if (in.readLine().equals("1")) {
+				System.out.println("1");
+
 				bis.read(bArray, 0, bArray.length);
 				bos.write(bArray, 0, bArray.length);
 				bos.flush();
-
-				// File sent
-			} catch (IOException ex) {
-				// Do exception handling
+			} else {
+				// Server refused file
 			}
+		} catch (IOException ex) {
+			// Do exception handling
+		} finally {
+			bis.close();
+			fis.close();
 		}
 	}
 
@@ -143,6 +169,63 @@ public class ClientProcess implements Runnable {
 	public void setReal(boolean real) {
 		graph.setVisible(real);
 	}
+
+	public String getDegree() {
+		return degree;
+	}
+
+	public void setDegree(String degree) {
+		this.degree = degree;
+	}
+
+	public void getTempHistory(int[] times) throws IOException, InterruptedException {
+		
+		String dateTime = "";
+		for (int i = 0; i < times.length; i++) {
+			dateTime += String.valueOf(times[i]) + ",";
+		}
+		System.out.println(dateTime);
+		out.write("getData");
+		out.newLine();
+		out.flush();
+		out.write(dateTime);
+		out.newLine();
+		out.flush();
+	}
 	
+	private void setDateTimeData(String s) {
+		this.dateTimeData = s;
+	}
 	
+	public String getDateTimeData() {
+		return this.dateTimeData;
+	}
+	
+	public void graphCustom(String data) {
+		System.out.println(data);
+		CustomViewGraph cGraph = new CustomViewGraph(null);
+		cGraph.pack();
+		cGraph.setVisible(true);
+	}
+
+	public File getInFile() {
+		return inFile;
+	}
+
+	public void setInFile(File inFile) {
+		this.inFile = inFile;
+	}
+	
+	public void setSensorSleep(long rate) {
+		try {
+			out.write("sr");
+			out.newLine();
+			out.flush();
+			out.write(String.valueOf(rate));
+			out.newLine();
+			out.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
