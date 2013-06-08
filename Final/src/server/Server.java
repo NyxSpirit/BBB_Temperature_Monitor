@@ -15,6 +15,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Server implements Runnable {
+	
+	// Change this number to a different number
+	// if unable to connect to the server
+	// BE SURE TO UPDATE PORT FORWARDING
+	private final int PORT_NUMBER = 61223;
 
 	private static int MAX_CLIENT_TIMEOUT = 20000;   // Timeout 20 seconds
 	private static Queue<String> tempQueue = null;
@@ -42,7 +47,7 @@ public class Server implements Runnable {
 	// Send data to client, listen for updates, etc.
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(61223);
+			serverSocket = new ServerSocket(PORT_NUMBER);
 			while (true) {
 				disconnected = false;
 				System.out.println("Waiting for client");
@@ -100,7 +105,6 @@ public class Server implements Runnable {
 						while (br.ready()) {
 							// Get the command
 							command = br.readLine();
-							System.out.println(command);
 							
 							// Do the command and remember to host.setReset(true) when updating sleep/reads/real-time
 							//TODO: Write the proper command thing here, do it in a separate method easier handling

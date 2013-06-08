@@ -27,6 +27,8 @@ public class SettingPanel extends JPanel {
 	private static final long SEC_30 = 30000;
 	private static final long MIN_1 = 100000;
 	private static final long MIN_10 = 1000000;
+	
+	private final int PORT_NUMBER = 61223;
 
 	private static final String F = "F";
 	private static final String C = "C";
@@ -53,7 +55,7 @@ public class SettingPanel extends JPanel {
 		this.setLayout(null);
 		this.dataWriteRate = SEC_1;
 		this.degree = F;
-		this.portNum = 61223;
+		this.portNum = PORT_NUMBER;
 		this.ipAddress = "127.0.0.1";  // IP for the server
 		initialize();
 	}
