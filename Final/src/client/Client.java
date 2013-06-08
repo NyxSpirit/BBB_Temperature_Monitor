@@ -28,7 +28,6 @@ import javax.swing.SwingConstants;
 public class Client {
 
 	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);
-	private static final String IP = "131.191.106.216";
 
 	private JButton btnMain1;
 	private JButton btnCustHome;

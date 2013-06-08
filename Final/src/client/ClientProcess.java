@@ -193,6 +193,7 @@ public class ClientProcess implements Runnable {
 		out.flush();
 	}
 	
+	@SuppressWarnings("unused")
 	private void setDateTimeData(String s) {
 		this.dateTimeData = s;
 	}
