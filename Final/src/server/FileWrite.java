@@ -86,6 +86,7 @@ public class FileWrite implements Runnable {
 		queue.clear();
 		bw.close();
 		fw.close();
+		System.out.println("Wrote data to file");
 	}
 
 	public boolean isStop() {

@@ -90,13 +90,13 @@ public class ClientProcess implements Runnable {
 						graph.setTempValue(Float.parseFloat(data));
 						//System.out.println(input);
 					} catch (Exception e) {
-						System.out.println(e.getMessage());
+						//System.out.println(e.getMessage());
 					}
 				}
 			}
 			disconnect();
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			//System.out.println(e.getMessage());
 		} finally {
 
 		}
@@ -139,15 +139,12 @@ public class ClientProcess implements Runnable {
 			bos = new BufferedOutputStream(client.getOutputStream());
 
 			// Send the file size
-			System.out.println((int) file.length());
 			bos.write((int) file.length());
 			bos.flush();
 
 
 			// If the server is ready for the file
 			if (in.readLine().equals("1")) {
-				System.out.println("1");
-
 				bis.read(bArray, 0, bArray.length);
 				bos.write(bArray, 0, bArray.length);
 				bos.flush();
@@ -184,7 +181,7 @@ public class ClientProcess implements Runnable {
 		for (int i = 0; i < times.length; i++) {
 			dateTime += String.valueOf(times[i]) + ",";
 		}
-		System.out.println(dateTime);
+		//System.out.println(dateTime);
 		out.write("getData");
 		out.newLine();
 		out.flush();
@@ -203,7 +200,7 @@ public class ClientProcess implements Runnable {
 	}
 	
 	public void graphCustom(String data) {
-		System.out.println(data);
+		//System.out.println(data);
 		CustomViewGraph cGraph = new CustomViewGraph(null);
 		cGraph.pack();
 		cGraph.setVisible(true);

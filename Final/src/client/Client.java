@@ -223,7 +223,7 @@ public class Client {
 						if (e instanceof UnknownHostException || e instanceof IOException){
 							JOptionPane.showMessageDialog(null, "Unable to connect to the host server. Ensure the server is available and the I.P. Address and port number are correct.");
 						}
-						System.out.println(e.getMessage());
+						//System.out.println(e.getMessage());
 					} finally {
 						frmTruClient.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					}
@@ -247,7 +247,7 @@ public class Client {
 					btnCustom.setEnabled(false);
 					frmTruClient.repaint();
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+					//System.out.println(e.getMessage());
 				} finally {
 					frmTruClient.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
