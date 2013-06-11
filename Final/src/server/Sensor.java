@@ -140,7 +140,16 @@ public class Sensor implements Runnable {
 		int cikisInt = Integer.parseInt(cikis.trim(),16);
 		cikisInt = cikisInt >> 4; // Shift bits by 4
 
-		return cikisInt * sabitDeger; // Multiply by constant to get temp
+		return convertToF(cikisInt * sabitDeger); // Multiply by constant to get temp
+	}
+	
+	/**
+	 * Converts C to F.
+	 * @param test - Degree in C
+	 * @return - Degrees in F
+	 */
+	private float convertToF(float test) {
+		return (float) ((test * (9.0 / 5.0)) + 32.0);
 	}
 
 	public int getSleep() {
