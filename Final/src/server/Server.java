@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.swing.JOptionPane;
 
 /**
  * The Server class creates a new Server that will interact with a client.
@@ -26,8 +25,7 @@ import javax.swing.JOptionPane;
  */
 public class Server implements Runnable {
 	
-	private static final int MAX_PORT = 65535;
-	private static int portNumber;
+	private static int portNumber = 61223;
 
 	private static int MAX_CLIENT_TIMEOUT = 20000;   // Timeout 20 seconds
 	private static Queue<String> tempQueue = null;
@@ -47,12 +45,6 @@ public class Server implements Runnable {
 
 	public static void main(String[] args) throws IOException {
 		server = new Thread(new Server(), "Server-Run");
-		try {
-			setPortNumber(JOptionPane.showInputDialog(null, "Please enter a port number to listen on:"));
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Invalid port number. Please enter a valid port number (1 - " + MAX_PORT + "). Exiting.");
-			System.exit(0);
-		}
 		server.run();
 		System.out.println("closed");
 	}
@@ -61,7 +53,7 @@ public class Server implements Runnable {
 	// Send data to client, listen for updates, etc.
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(61223);
+			serverSocket = new ServerSocket(portNumber);
 			while (true) {
 				disconnected = false;
 				System.out.println("Waiting for client on port " + getPortNumber());
@@ -172,12 +164,4 @@ public class Server implements Runnable {
 		return portNumber;
 	}
 	
-	private static void setPortNumber(String s) throws Exception {
-		int port = Integer.parseInt(s);
-		if (port < 1 || port > MAX_PORT) {
-			throw new Exception("Invalid port number");
-		} else {
-			portNumber = port;
-		}
-	}
 }
