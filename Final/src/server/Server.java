@@ -1,4 +1,5 @@
 package server;
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -8,18 +9,26 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketImpl;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.swing.JOptionPane;
+
+/**
+ * The Server class creates a new Server that will interact with a client.
+ * <br><br>
+ * The Server is responsible for maintaining connection to the client and spawning threads that will read data, write to a file, and send data to the client.
+ * 
+ * @author Nick Ames
+ *
+ */
 public class Server implements Runnable {
 	
 	private static final int MAX_PORT = 65535;
-
-	private static int portNumber;  // A commandline arg, in eclipse go to menu bar->run->run configuration, go to server and commandline args, put port number
+	private static int portNumber;
 
 	private static int MAX_CLIENT_TIMEOUT = 20000;   // Timeout 20 seconds
 	private static Queue<String> tempQueue = null;
@@ -38,21 +47,22 @@ public class Server implements Runnable {
 	private BufferedWriter bf = null;   // same
 
 	public static void main(String[] args) throws IOException {
+		server = new Thread(new Server(), "Server-Run");
 		try {
-			setPortNumber(args[0]);
+			setPortNumber(JOptionPane.showInputDialog(null, "Please enter a port number to listen on:"));
 		} catch (Exception e) {
-			System.out.println("Invalid port number. Please enter a valid port number (non-negative integer). Exiting.");
+			JOptionPane.showMessageDialog(null, "Invalid port number. Please enter a valid port number (1 - " + MAX_PORT + "). Exiting.");
 			System.exit(0);
 		}
-		server = new Thread(new Server(), "Server-Run");
 		server.run();
 		System.out.println("closed");
 	}
 
+
 	// Send data to client, listen for updates, etc.
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(getPortNumber());
+			serverSocket = new ServerSocket(61223);
 			while (true) {
 				disconnected = false;
 				System.out.println("Waiting for client on port " + getPortNumber());
@@ -110,18 +120,19 @@ public class Server implements Runnable {
 						while (br.ready()) {
 							// Get the command
 							command = br.readLine();
+							System.out.println(command);
 							
 							// Do the command and remember to host.setReset(true) when updating sleep/reads/real-time
-							//TODO: Write the proper command thing here, do it in a separate method easier handling
 							if (command.equals("sr")) {
 								host.setSleep(Integer.parseInt(br.readLine()));
 								host.setReset(true);
 							}
-							if (command.equals("getData")) {
+							if (command.equals("Request Temp History")) {
 								host.setRealtime(false);
 								String dateTime = br.readLine();
 								host.sendDataToClient(dateTime);
 								host.setRealtime(true);
+								System.out.println("Sent Temp History");
 							}
 							/*
 							 * Client sending the disconnect request to the server. 
@@ -157,7 +168,7 @@ public class Server implements Runnable {
 			e.printStackTrace();
 		}
 	}
-
+	
 	private static int getPortNumber() {
 		return portNumber;
 	}

@@ -1,0 +1,46 @@
+Setting up the Server program:
+
+To use the Server program port forwarding must be enabled on the computer it is run from:
+
+On Windows 7 (Over Internet):
+
+
+1) Click the “Start” button”
+
+2) Select “Command prompt”
+
+3) Enter:   ipconfig /all     (there must be a space between ipconfig and /all)
+
+4) Get your “Default Gateway” number and your “IPv4 Address” number.
+
+5) Open you browser.
+
+6) Enter your “Default Gateway” number in the address bar. This will open you router’s GUI.
+
+7) All routers are different, but look for a category such as “Port Forwarding” or “Gaming” (there are many tutorials on Youtube.com showing how)
+
+8) Enter your “IPv4 Address” and a port number. (Generally anything from 2,000 – 64,000)
+
+9) Save and initiate the changes.
+
+10) In your browser go to whatsmyip.org
+
+11) Your public IP address should be displayed, copy this number.
+
+Launching the Server (Over Internet):
+
+1) Open the Server.jar file.
+
+2) A pop-up message will appear asking for a port number. Put the number you previously enabled for port forwarding in the text-box and click enter.
+
+3) The log screen should appear saying “Waiting for client on port xxxx.” Where xxxx is the port number you specified.
+
+On Windows 7 (Local Network):
+
+1) Open the Server.jar file.
+
+2) A pop-up message will appear asking for a port number. Enter a number between 2,000 and 64,000 (DO NOT type a “,”).
+
+3) The log screen should appear saying “Waiting for client on port xxxx.” Where xxxx is the port number specified.
+
+*Consult the info_pack.zip for additional information regarding installation of BeagleBone Black and TMP102 Temperature sensor.

@@ -1,0 +1,7 @@
+Client - Real-Time:
+
+The Real-Time operation will allow the user to view real-time temperature data from the server.
+
+This readout can be changed through the use of the Settings panel on the menu bar.
+
+The user also has the option of viewing the real-time data in a dynamic graph.

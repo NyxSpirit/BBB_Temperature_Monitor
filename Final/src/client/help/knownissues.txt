@@ -1,0 +1,7 @@
+Known Issues:
+
+Problem: Unable to connect to server after port-forwarding.
+Solution: Try a different port number (if 4593 didn't work, try 64112 or 14226, ect.). If the problem pursists, try updating the firmware of your router. If you continue to experience problems, it could be due to a fault in the router, modem or your internet service provider.
+
+Problem: Server immediately closes after entering a port number.
+Solution: Try a different port number. Ensure you are not running another server on the same port.

@@ -114,7 +114,7 @@ public class Host implements Runnable  {
 		byte[] aByte = new byte[1];
 		@SuppressWarnings("unused")
 		int bytesRead;
-		String outFile = "tempout.ini";
+		String outFile = "config.out..ini";
 
 		// Get the config values
 		// Parse the file and use appropriate values
@@ -302,6 +302,7 @@ public class Host implements Runnable  {
 		this.tempFormat = tempFormat;
 	}
 
+	// IN DEVELOPMENT
 	public void sendDataToClient(String dateTime) throws IOException {
 		String dateTimeData = getDateTimeData(dateTime);
 		bf.write("d");
@@ -312,6 +313,7 @@ public class Host implements Runnable  {
 		bf.flush();
 	}
 
+	// IN DEVELOPMENT
 	private String getDateTimeData(String dateTime) {
 		String dateTimeData = "";
 		String [] sTimes = dateTime.split(",");
@@ -325,13 +327,14 @@ public class Host implements Runnable  {
 		return dateTimeData;
 	}
 
+	// IN DEVELOPMENT
 	private String getDataFromFile(String[] sTimes) {
 		String dateTimeData = "";
 		for (int i = 0; i < sTimes.length; i++) {
 			dateTimeData += sTimes[i];
 		}
 		
-		// TODO Open File, Search for date/times, save to single string, return
+		// NEED TO Open File, Search for date/times, save to single string, return
 		return dateTimeData;
 	}
 }

@@ -1,0 +1,9 @@
+Client - Custom View: (IN DEVELOPMENT)
+
+The Custom View allows the user to view previously recorded data.
+
+The user is asked to specify a time period that includes a year, month, day, and time.
+
+A graph is then displayed showing the historical data captured over this time period.
+
+*Currently in development. A sample graph is shown to give a general idea of how the Custom View will function.

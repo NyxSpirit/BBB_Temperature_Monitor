@@ -1,0 +1,11 @@
+Server:
+
+The server is responsible for controlling temperature reading, client connection, and file writing of temperature data.
+
+When the server begins, a port number is requested from the user. This port is then opened and the server begins listening on the port for a client connection.
+
+Once the client connects, the configuration file is received from the client and the temperature reading, file-writing, and client-data-transfer threads begin execution.
+
+The server will continue to send real-time temperature data to the client while writing this data to a file associated with the current date and time.
+
+The client can request data history and/or real-time data from the server through commands over the socketed connection.

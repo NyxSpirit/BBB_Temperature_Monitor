@@ -20,56 +20,71 @@ import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+/**
+ * The Setting Panel contains the information for configuring the GUI and server process.
+ * @author Nick Ames
+ *
+ */
 public class SettingPanel extends JPanel {
 
+	/*
+	 * Sensor Reading Rates
+	 */
 	private static final long SEC_1 = 1000;
 	private static final long SEC_10 = 10000;
 	private static final long SEC_30 = 30000;
 	private static final long MIN_1 = 100000;
 	private static final long MIN_10 = 1000000;
-	
-	private final int PORT_NUMBER = 61223;
 
+	/*
+	 * Degrees
+	 */
 	private static final String F = "F";
 	private static final String C = "C";
 
-	private static final long serialVersionUID = 1L;
-	private String[] fonts;
-	private JTextField txtIP;
-	private JTextField txtPortNum;
-
-	private long dataWriteRate;        // In milliseconds
-	private String fontName;
-	private int fontSize;
-	private String degree;
-
-	private int portNum;
-	private String ipAddress;
-
-
 	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);
 
+	private static final long serialVersionUID = 1L;
+	
+	private String[] fonts;         // Contains all fonts available to the user
+	private JTextField txtIP;       // The IP Address to use to connect to the server
+	private JTextField txtPortNum;  // The port number to connect to
+
+	private long dataWriteRate;     // In milliseconds
+	private String fontName;        // Name of the selected font
+	private int fontSize;           // Size of font
+	private String degree;          // Either C or F
+
+	private int portNum;            // Port Number
+	private String ipAddress;       // IP Address
+
+	/**
+	 * Creates a new SettingPanel.
+	 */
 	public SettingPanel() {
 		super();
 		this.setBounds(DIM);
 		this.setLayout(null);
 		this.dataWriteRate = SEC_1;
 		this.degree = F;
-		this.portNum = PORT_NUMBER;
+		this.portNum = 61223;
 		this.ipAddress = "127.0.0.1";  // IP for the server
 		initialize();
 	}
 
 	private void initialize() {
 
+		// Get all available fonts
 		fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 
-		// Settings Panel /////////////////////////////////////////////
+		// Settings Panel 
 		final JTabbedPane tbSetting = new JTabbedPane(JTabbedPane.BOTTOM);
 		tbSetting.setBounds(0, 0, 260, 163);
 		this.add(tbSetting);
 
+		///////////////////////////////////////////////////////
 		// Real-time settings
+		///////////////////////////////////////////////////////
 		JPanel realP = new JPanel();
 		tbSetting.addTab("Real-Time", null, realP, null);
 		realP.setLayout(null);
@@ -143,6 +158,9 @@ public class SettingPanel extends JPanel {
 			}
 		});
 
+		/////////////////////////////////////////////////////////
+		// Connection
+		/////////////////////////////////////////////////////////
 		JPanel connectP = new JPanel();
 		connectP.setLayout(null);
 		tbSetting.addTab("Connection", null, connectP, null);

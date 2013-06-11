@@ -19,29 +19,42 @@ import javax.swing.JTextField;
 
 import org.jfree.ui.RefineryUtilities;
 
+/**
+ * The ClientProcess class is a Runnable class that continually interacts with the server over a socket connection.
+ * <br><br>
+ * The ClientProcess creates a connection to the server, sends configuration data, receives real-time temperature data, and acquires historical data from the server.
+ * 
+ * @author Nick Ames
+ *
+ */
 public class ClientProcess implements Runnable {
 
-	//private static final String IP = "131.191.106.216";
+	private Socket serverSocket = null;     // Socket for connection to the server
+	private BufferedReader in = null;       // Allows easy reading over socket input stream
+	private BufferedWriter out = null;      // Allows easy writing to socket output stream
+	private boolean closed;                 // Tests whether the connection to the server has been closed
+	private boolean real;                   // Tests whether data should be real-time over streams (sent to server)
 
-	private Socket kkSocket = null;
-	private BufferedReader in = null;
-	private BufferedWriter out = null;
-	private boolean closed;
-	private boolean real;
+	private String degree;  // The degree to convert temperature values to (sent as F)
+	private File inFile;    // The file to be sent to the server (config file)
 
-	private String degree;
+	private JTextField txtTemp;   // Easy pointer to realPanel's JTextField
+	private RTGraph graph;        // The real-time dynamic graph object
 	
-	private File inFile;
-
-	// Pointers for interactions between components in other classes
-	private JTextField txtTemp;
-
-	private RTGraph graph;
-
-	private String ip = "131.191.106.216"; /// Put the ip InetAddress.getByName(ip)
-	private int port;
-	private String dateTimeData;
-
+	private String ip;            // IP Address of the server
+	private int port;             // The port number to connect to the server
+	private String dateTimeData;  // The dateTimeData to be sent/received from server ***IN DEVELOPMENT
+	
+	/**
+	 * Creates a new ClientProcess.
+	 * <br><br>
+	 * The ClientProcess will maintain and control interaction between the client and the server over a port number and ip address.
+	 * It will also interact with the realtime panel to allow easy real-time data to be shown.
+	 * @param ip - IP Address of the server as a String
+	 * @param port - Port number of the server (int)
+	 * @param txtTemp - JTextField pointer to realPanel
+	 * @param degree - The degree to begin reading data (String)
+	 */
 	public ClientProcess(String ip, int port, JTextField txtTemp, String degree) {
 		this.ip = ip;
 		this.port = port;
@@ -49,7 +62,10 @@ public class ClientProcess implements Runnable {
 		this.degree = degree;
 		this.dateTimeData = "";
 	}
-
+	
+	/**
+	 * The continual process that allows interaction and real-time data between client and server.
+	 */
 	public void run() {
 		try {
 			out.newLine();
@@ -67,17 +83,17 @@ public class ClientProcess implements Runnable {
 			// Loop for getting data from server
 			while (!closed) {
 				input = in.readLine();
-
-				if (input == null) {
-					//break;
-				}
 				
+				// If the server sends historical date/time data
 				if (input.equals("d")) {
 					String dt = in.readLine();
 					graphCustom(dt);
-				} else if (input.equals("b")) {
 					
+					// If heartbeat, ignore, server is ensuring connection
+				} else if (input.equals("b")) {
 				} else {
+					
+					// If no commands, must be real-time data
 					try {
 						float test = Float.parseFloat(input);
 
@@ -85,45 +101,65 @@ public class ClientProcess implements Runnable {
 						if (getDegree().equals("C")) {
 							test = convertToC(test);
 						}
+						
+						// Set the JTextField on the realPanel to real-time data
 						String data = new DecimalFormat("0.00").format(test);
 						txtTemp.setText(data);
 						graph.setTempValue(Float.parseFloat(data));
-						//System.out.println(input);
 					} catch (Exception e) {
-						//System.out.println(e.getMessage());
 					}
 				}
 			}
+			
+			// If connection end, begin disconnect process
 			disconnect();
 		} catch (IOException e) {
-			//System.out.println(e.getMessage());
-		} finally {
-
 		}
 	}
-
+	
+	/**
+	 * Converts F to C.
+	 * @param test - Degree in fahrenheit
+	 * @return - Degrees in Celsius
+	 */
 	private float convertToC(float test) {
 		return (float) ((test - 32.0) * (5.0 / 9.0));
 	}
-
+	
+	/**
+	 * Attempts to connect to the server through the given IP Address and Port Number.
+	 * <br><br>
+	 * Once connected, the configuration file is sent.
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
 	public void connect() throws UnknownHostException, IOException {
-		kkSocket = new Socket(InetAddress.getByName(ip), port);
-		in = new BufferedReader(new InputStreamReader(kkSocket.getInputStream()));
-		out = new BufferedWriter(new OutputStreamWriter(kkSocket.getOutputStream()));
-		sendFile(kkSocket);
-		kkSocket.getOutputStream().flush();
+		serverSocket = new Socket(InetAddress.getByName(ip), port);
+		in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
+		out = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream()));
+		sendFile(serverSocket);
+		serverSocket.getOutputStream().flush();
 		this.closed = false;
 	}
-
+	
+	/**
+	 * Disconnects from the server in a safe way, terminating the thread and closing the socket.
+	 * @throws IOException
+	 */
 	public void disconnect() throws IOException {
 		// Stream is a holding tank, need to send the text, create a line, and then flush the stream
 		// Can send data to the server by this method
 		this.closed = true;
-		kkSocket.shutdownOutput();
-		kkSocket.shutdownInput();
-		kkSocket.close();
+		serverSocket.shutdownOutput();
+		serverSocket.shutdownInput();
+		serverSocket.close();
 	}
-
+	
+	/**
+	 * Sends the configuration file to the server as a byte array.
+	 * @param client - The socket currently connected to the server
+	 * @throws IOException
+	 */
 	public void sendFile(Socket client) throws IOException {
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
@@ -142,7 +178,6 @@ public class ClientProcess implements Runnable {
 			bos.write((int) file.length());
 			bos.flush();
 
-
 			// If the server is ready for the file
 			if (in.readLine().equals("1")) {
 				bis.read(bArray, 0, bArray.length);
@@ -158,23 +193,40 @@ public class ClientProcess implements Runnable {
 			fis.close();
 		}
 	}
-
+	
+	/**
+	 * Tests if the data should be real-time from the server.
+	 * @return - true if data is being read real-time
+	 */
 	public boolean isReal() {
 		return real;
 	}
 
+	/**
+	 * Sets the real-time read (sent to server)
+	 * @param real - boolean
+	 */
 	public void setReal(boolean real) {
 		graph.setVisible(real);
 	}
 
+	/**
+	 * The degree is either F or C
+	 * @return - Current degree as a String
+	 */
 	public String getDegree() {
 		return degree;
 	}
 
+	/**
+	 * Sets the measurement for degrees
+	 * @param degree - String (F or C)
+	 */
 	public void setDegree(String degree) {
 		this.degree = degree;
 	}
-
+	
+	// IN DEVELOPMENT
 	public void getTempHistory(int[] times) throws IOException, InterruptedException {
 		
 		String dateTime = "";
@@ -182,7 +234,7 @@ public class ClientProcess implements Runnable {
 			dateTime += String.valueOf(times[i]) + ",";
 		}
 		//System.out.println(dateTime);
-		out.write("getData");
+		out.write("Request Temp History");
 		out.newLine();
 		out.flush();
 		out.write(dateTime);
@@ -190,15 +242,18 @@ public class ClientProcess implements Runnable {
 		out.flush();
 	}
 	
+	// IN DEVELOPMENT
 	@SuppressWarnings("unused")
 	private void setDateTimeData(String s) {
 		this.dateTimeData = s;
 	}
 	
+	// IN DEVELOPMENT
 	public String getDateTimeData() {
 		return this.dateTimeData;
 	}
 	
+	// IN DEVELOPMENT
 	public void graphCustom(String data) {
 		//System.out.println(data);
 		CustomViewGraph cGraph = new CustomViewGraph(null);
@@ -206,14 +261,26 @@ public class ClientProcess implements Runnable {
 		cGraph.setVisible(true);
 	}
 
+	/**
+	 * Gets the File object that holds the configuration file.
+	 * @return - File
+	 */
 	public File getInFile() {
 		return inFile;
 	}
 
+	/**
+	 * Set the configuration file to be sent to the server.
+	 * @param inFile - File
+	 */
 	public void setInFile(File inFile) {
 		this.inFile = inFile;
 	}
 	
+	/**
+	 * Set the rate at which the sensor should read on the server.
+	 * @param rate - sleep in milliseconds
+	 */
 	public void setSensorSleep(long rate) {
 		try {
 			out.write("sr");

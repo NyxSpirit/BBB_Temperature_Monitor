@@ -1,0 +1,20 @@
+Setting up the Client Program:
+
+To connect to the Server program from the Client program:
+
+1) Launch the program by double clicking on the jar file’s icon.
+
+2) From the ‘Client’ menu select:  Settings
+
+3) Select the tab:  Connection 
+
+4) Enter the Public I.P.  address (over internet step 10) or 127.0.0.1 (local network) in the I.P. Address Field.
+
+5) Enter the server port number that you set in the server program in the Port Number text field.
+
+6) Click ‘Home’ to return to the main screen
+
+7) Click the Connect button.
+
+
+*Consult the info_pack.zip for additional information regarding installation of BeagleBone Black and TMP102 Temperature sensor.

@@ -1,0 +1,7 @@
+Client - Settings:
+
+The Connection screen is where the user can alter the appearance of the real-time data or change the way the client connects to the server.
+
+On the Real-Time tab, the user can choose a Font, Font-Size and Degree Unit for the Real-Time temperature data view.
+
+On the Connection tab, the user can change the I.P. Address of the Server and the port number of the Server. Additionally, the user can change the rate at which data is recorded by selecting a data capture rate.

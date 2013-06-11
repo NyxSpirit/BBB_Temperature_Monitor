@@ -22,15 +22,22 @@ import org.jfree.data.time.DynamicTimeSeriesCollection;
 import org.jfree.data.time.Second;
 import org.jfree.data.xy.XYDataset;
 
+/**
+ * Real-Time Dynamic graph that scrolls with data received.
+ * @author Nick Ames
+ * @author Bryan Johnston
+ *
+ */
 public class RTGraph extends JFrame {
 
-	private static final long serialVersionUID = -5588698846999765446L;
+	private static final long serialVersionUID = 1L;
 	private static final String TITLE = "Real-Time Temperature";
-    private static final float MINMAX = 150;
-    private static final int COUNT = 2 * 60;
-    private static final int SLOW = 500;
+	
+    private static final float MINMAX = 150;  // Min and Max for Y values
+    private static final int COUNT = 2 * 60;  // X intervals
+    private static final int SLOW = 500;      // Speed of graph updates
     
-    private static DynamicTimeSeriesCollection dataset = null;
+    private static DynamicTimeSeriesCollection dataset = null;  // Dynamic dataset
     private JFreeChart chart = null;
     private JTextField txtData = null;
     private JLabel lblData = null;
@@ -40,11 +47,18 @@ public class RTGraph extends JFrame {
     private Timer timer;
 	private float tempValue;
 
+	/**
+	 * Creates a new Dynamic graph for real-time temp data.
+	 * @param title
+	 */
     public RTGraph(final String title) {
         super(title);
         initialize();
     }
     
+    /**
+     * Create the GUI.
+     */
     private void initialize() {
     	
     	// Create the Dynamic Data Set for Graphing

@@ -12,7 +12,7 @@ import java.util.Calendar;
  * <br><br>
  * <b>Example Output:</b>
  * <br>
- * &nbsp&nbsp&nbsp (INSERT DATE TIME FORMAT) : 72.345 (F)
+ * &nbsp&nbsp&nbsp 70.94321664135062 100613_205319
  * 
  * @author Nick Ames
  *

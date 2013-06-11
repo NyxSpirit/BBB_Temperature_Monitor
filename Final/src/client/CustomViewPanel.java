@@ -15,17 +15,28 @@ import javax.swing.SwingConstants;
 
 import org.jdesktop.swingx.JXDatePicker;
 
+/**
+ * A panel that allows the user to choose date/times to graph in a custom way.
+ * <br><br>
+ * @author Nick Ames
+ * @author Bryan Johnston
+ *
+ */
 public class CustomViewPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
-	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);
-	private static JSpinner spinTimeTo_1;
-	private JXDatePicker jDateFrom;
-	private JXDatePicker jDateTo;
-	private JSpinner spinTimeFrom;
-	@SuppressWarnings("unused")
-	private JSpinner spinTimeTo;
+	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);  // Panel dimensions
 	
+	private static JSpinner spinTimeTo_1;  // Time to graph to
+	private JXDatePicker jDateFrom;        // Date to start
+	private JXDatePicker jDateTo;          // Date to end
+	private JSpinner spinTimeFrom;         // Time to graph from
+	@SuppressWarnings("unused")
+	private JSpinner spinTimeTo;           // Time to graph to
+	
+	/**
+	 * Creates a new custom view panel with components to allow user to select custom graphing dates/times
+	 */
 	public CustomViewPanel() {
 		super();
 		setBounds(DIM);
@@ -217,12 +228,15 @@ public class CustomViewPanel extends JPanel {
 
 		return dates;
 	}
-
+	
+	// IN DEVELOPMENT
 	public void showGraph() {
-		// TODO Auto-generated method stub
-		System.out.println("show");
 	}
 	
+	/**
+	 * Returns the dates from the spinner and date components as an int array
+	 * @return - int[]
+	 */
 	public int[] getDates() {
 		return getPeriod(spinTimeFrom, spinTimeTo_1, jDateFrom, jDateTo);
 	}

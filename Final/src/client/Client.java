@@ -1,6 +1,7 @@
 package client;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -25,33 +26,46 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+/**
+ * Main class for the client side of the T.R.U. Temperature Reading Unit.
+ * <br><br>
+ * The client side is responsible for connecting to the server over a socket using either local network or the internet.
+ * <br><br>
+ * The Server side of the T.R.U. needs to have an open port in order for the client to connect.
+ * <br><br>
+ * The client uses a GUI environment to allow the user to interact with the server and see data in graphical and textual means.
+ * 
+ * @author Nick Ames
+ *
+ */
 public class Client {
 
-	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);
+	private static final Rectangle DIM = new Rectangle(0, 21, 260, 199);  // Dimensions for the panels
 
-	private JButton btnMain1;
-	private JButton btnCustHome;
-	private JButton btnCustGraph;
+	private JButton btnMain1;      // JButtons to interact with panels
+	private JButton btnCustHome;   // ''
+	private JButton btnCustGraph;  // ''
 
-	private Thread client;
+	private Thread client;         // The client will be on a thread in order to receive data and manipulate graphs
 
-	private JFrame frmTruClient;
-	private ClientProcess cp;
-	private JPanel realPanel;
+	private JFrame frmTruClient;   // The frame for the GUI
+	private ClientProcess cp;      // The process that will interact with the server over the socket
+	private JPanel realPanel;      // The real-time data panel
 
-	private SettingPanel settingPanel;
-
-	private CustomViewPanel customPanel;
+	private SettingPanel settingPanel;    // The panel that contains the setting and config info
+	private HelpPanel helpPanel;          // Panel containing the help contents
+	private CustomViewPanel customPanel;  // Panel for creating a custom graph
 	
-	private String degree;
+	private String degree;         // The temp in degrees (F or C)
 	
-	private String ipAddress;
-	private int portNum;
+	private String ipAddress;      // IP Address for the server
+	private int portNum;           // Port number of the server
 	
-	private long sensorSleepRate;
-
+	private long sensorSleepRate;  // The rate at which the data should be read (sent to server)
+	
 	/**
-	 * Launch the application.
+	 * Main class for client. Start the GUI and allow user to interact.
+	 * @param args
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -67,16 +81,21 @@ public class Client {
 	}
 
 	/**
-	 * Create the application.
+	 * Creates a new instance of a Client class. Sets up a graphical environment and the ability to connect to a server.
 	 */
 	public Client() {
 		initialize();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
+	 * Initializes the components and actions for the components of the GUI.
 	 */
 	private void initialize() {
+		
+		///////////////////////////////////////////////////////////////////////
+		// Application Frame
+		///////////////////////////////////////////////////////////////////////
+		
 		frmTruClient = new JFrame();
 		frmTruClient.setResizable(false);
 		frmTruClient.setIconImage(Toolkit.getDefaultToolkit().getImage(Client.class.getResource("/org/jfree/chart/gorilla.jpg")));
@@ -158,7 +177,10 @@ public class Client {
 		final JLabel lblTempD = new JLabel("F");
 		lblTempD.setBounds(151, 71, 20, 14);
 		realPanel.add(lblTempD);
-
+		
+		/**
+		 * Return to home from the Real-Time panel
+		 */
 		btnMain1 = new JButton("Main Menu");
 		btnMain1.addActionListener(new ActionListener() {
 			// Show other JPanel
@@ -169,7 +191,10 @@ public class Client {
 		});
 		btnMain1.setBounds(71, 138, 100, 23);
 		realPanel.add(btnMain1);
-
+		
+		/**
+		 * Graph the Real-Time data from the realTime panel
+		 */
 		JButton btnRealGraph = new JButton("Graph");
 		btnRealGraph.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -200,14 +225,24 @@ public class Client {
 		// Action Listeners
 		///////////////////////////////////////////////////////////////////////
 		
-		// Connect to the server button
+		/**
+		 * Connect to the server.
+		 */
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
+				// If the client is not connected, connect to the server
 				if (btnConnect.getText().equals("Connect")) {
+					
+					// Create a new client process that will interact with the server (opens the connection, gets data, etc.)
 					cp = new ClientProcess(settingPanel.getIpAddress(), getPortNum(), txtTemp, settingPanel.getDegree());
 					client = new Thread(cp);
+					
+					// Setup the settings file to be transferred
 					File file = createSettingsFile();
 					cp.setInFile(file);
+					
+					// Try to connect to the server
 					try {
 						frmTruClient.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						cp.connect();
@@ -223,7 +258,6 @@ public class Client {
 						if (e instanceof UnknownHostException || e instanceof IOException){
 							JOptionPane.showMessageDialog(null, "Unable to connect to the host server. Ensure the server is available and the I.P. Address and port number are correct.");
 						}
-						//System.out.println(e.getMessage());
 					} finally {
 						frmTruClient.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					}
@@ -233,7 +267,9 @@ public class Client {
 		btnConnect.setBounds(101, 56, 116, 23);
 		panel.add(btnConnect);
 		
-		// Disconnect from the server button
+		/**
+		 * Disconnect from the server.
+		 */
 		btnDisconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
@@ -247,7 +283,6 @@ public class Client {
 					btnCustom.setEnabled(false);
 					frmTruClient.repaint();
 				} catch (Exception e) {
-					//System.out.println(e.getMessage());
 				} finally {
 					frmTruClient.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				}
@@ -257,7 +292,9 @@ public class Client {
 		btnDisconnect.setVisible(false);
 		panel.add(btnDisconnect);
 		
-		// Change to the real-time view panel
+		/**
+		 * Change to the realTime panel from the homePanel
+		 */
 		btnReal.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//cp.setReal(true);  FOR THE GRAPH
@@ -269,7 +306,9 @@ public class Client {
 		btnReal.setBounds(101, 90, 116, 23);
 		panel.add(btnReal);
 		
-		// Go to the home panel from the custom screen
+		/**
+		 * Go back to the home panel from the customView panel
+		 */
 		btnCustHome.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				panel.setVisible(true);
@@ -277,7 +316,9 @@ public class Client {
 			}
 		});
 		
-		// Go to the custom view panel from the home panel
+		/**
+		 * Go to the customView panel from the home panel
+		 */
 		btnCustom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				customPanel.setVisible(true);
@@ -287,7 +328,9 @@ public class Client {
 		btnCustom.setBounds(101, 121, 116, 23);
 		panel.add(btnCustom);
 		
-		// Exit the program and disconnect
+		/**
+		 * Exit the program through a button on the home screen. Calls the disconnect method if connected to the server.
+		 */
 		JButton btnExit = new JButton("Exit");
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -304,9 +347,9 @@ public class Client {
 		btnExit.setBounds(101, 155, 116, 23);
 		panel.add(btnExit);
 		
-		// Home button from the settings panel
-		// IMPORTANT:
-		// This button will dictate the settings and affect different things
+		/**
+		 * Return home from settings. This will change the server, real-time data, and server read rate.
+		 */
 		btnHome.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				panel.setVisible(true);
@@ -340,12 +383,17 @@ public class Client {
 			}
 		});
 		
-		// Custom Graphing 
+		/**
+		 * Create a custom graph from temp history on the server. Gathers info for history from user then sends to server.
+		 * It then receives that data and creates a new custom graph.
+		 */
 		btnCustGraph.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
+				// Holds the times the user selected
 				final int[] times = customPanel.getDates();
 				
+				// Ensure the times are valid, then send to cp to get history
 				if (validDates(times)) {
 					try {
 						cp.getTempHistory(times);
@@ -371,7 +419,10 @@ public class Client {
 
 		JMenu mnNewMenu = new JMenu("File");
 		menuBar.add(mnNewMenu);
-
+		
+		/**
+		 * Exit the program.
+		 */
 		JMenuItem mExit = new JMenuItem("Exit");
 		mExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -389,7 +440,10 @@ public class Client {
 
 		JMenu mnNewMenu_1 = new JMenu("Client");
 		menuBar.add(mnNewMenu_1);
-
+		
+		/**
+		 * Opens the Settings page where the user can adjust certain settings.
+		 */
 		JMenuItem mPref = new JMenuItem("Settings");
 		mPref.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -402,10 +456,25 @@ public class Client {
 
 		JMenu mnNewMenu_2 = new JMenu("Help");
 		menuBar.add(mnNewMenu_2);
-
+		
+		/**
+		 * Opens the help frame.
+		 */
 		JMenuItem mHow = new JMenuItem("How To");
+		mHow.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				helpPanel = new HelpPanel();
+				helpPanel.fileSetup();
+				helpPanel.setPreferredSize(new Dimension(460, 395));
+				helpPanel.pack();
+				helpPanel.setVisible(true);
+			}
+		});
 		mnNewMenu_2.add(mHow);
-
+		
+		/**
+		 * Shows the current version and authors.
+		 */
 		JMenuItem mAbout = new JMenuItem("About");
 		mAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -417,12 +486,19 @@ public class Client {
 		
 		setSensorSleepRate(settingPanel.getDataWriteRate());
 	}
-
+	
+	/**
+	 * Creates a configuration file to be sent to the server. The configuration file will tell the server at what rate to read data.
+	 * @return File - the file to be sent to the server
+	 */
 	protected File createSettingsFile() {
 		File inFile = new File("config.ini");
 		FileWriter fo = null;
 		BufferedWriter bw = null;
+		
+		// Get the write rate
 		setSensorSleepRate(settingPanel.getDataWriteRate());
+		
 		try {
 			fo = new FileWriter(inFile);
 			bw = new BufferedWriter(fo);
@@ -449,7 +525,26 @@ public class Client {
 		
 		return inFile;
 	}
-
+	
+	/**
+	 * Checks the user selection of valid dates for a custom graph.
+	 * <br><br>
+	 * i.e. The user cannot specify a beginning date/time greater than the ending date/time.
+	 * <br><br>
+	 * The array is in the order:
+	 * <ul>
+	 * <li>Start Hour</li>
+	 * <li>Start Minute</li>
+	 * <li>End Hour</li>
+	 * <li>End Minute</li>
+	 * <li>Start Day</li>
+	 * <li>Start Year</li>
+	 * <li>End Day</li>
+	 * <li>End Year</li>
+	 * </ul>
+	 * @param times - integer array containing the dates and times
+	 * @return - <b>true</b> if valid date/time
+	 */
 	protected boolean validDates(final int[] times) {
 		
 		int startHour, startMin, endHour, endMin, startDay, startYear, endDay, endYear;
@@ -474,35 +569,68 @@ public class Client {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * Returns the current degree (F or C)
+	 * @return - degree as a String
+	 */
 	public String getDegree() {
 		return degree;
 	}
-
+	
+	/**
+	 * Sets the current degree measure (F or C)
+	 * @param degree - String (F or C)
+	 */
 	public void setDegree(String degree) {
 		this.degree = degree;
 	}
-
+	
+	
+	/**
+	 * Returns the current IP Address of the server
+	 * @return - IP Address of the server as a String
+	 */
 	public String getIpAddress() {
 		return ipAddress;
 	}
-
+	
+	/**
+	 * Sets the IP Address to connect to a server
+	 * @param ipAddress - String
+	 */
 	public void setIpAddress(String ipAddress) {
 		this.ipAddress = ipAddress;
 	}
-
+	
+	/**
+	 * Gets the current port number.
+	 * @return - Port number as an int
+	 */
 	public int getPortNum() {
 		return portNum;
 	}
-
+	
+	/**
+	 * Sets a port number to connect to the server
+	 * @param portNum - int
+	 */
 	public void setPortNum(int portNum) {
 		this.portNum = portNum;
 	}
-
+	
+	/**
+	 * Get the rate at which the sensor should sleep before reading another value.
+	 * @return - Rate in milliseconds (long)
+	 */
 	public long getSensorSleepRate() {
 		return sensorSleepRate;
 	}
-
+	
+	/**
+	 * Set the rate at which the server should read temperature data.
+	 * @param l - long milliseconds
+	 */
 	public void setSensorSleepRate(long l) {
 		this.sensorSleepRate = l;
 	}

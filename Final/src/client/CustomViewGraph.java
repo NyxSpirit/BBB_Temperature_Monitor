@@ -16,11 +16,17 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+/**
+ * Dummy Class that is currently being developed.
+ * @author Nick Ames
+ * @author Bryan Johnston
+ *
+ */
 public class CustomViewGraph extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	//private ArrayList<String> temps;
+	//private ArrayList<String> temps;  // For 
 
 	private XYDataset dataset;
 	private JFreeChart chart;

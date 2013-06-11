@@ -1,0 +1,10 @@
+Temperature Reading Unit (T.R.U.)
+
+This project consists of two separate programs: Client and Server
+Client is run from what is known as the host computer. This program displays temperature data which is being read (simulated) by another program running on a different computer. Client connects to the Server program through the internet.
+
+Please select a category and/or sub-category from the list.
+
+Created by:
+Nicholas Ames
+Bryan Johnston

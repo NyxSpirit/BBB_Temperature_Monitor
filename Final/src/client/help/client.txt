@@ -1,0 +1,7 @@
+Client:
+
+The client is what the user will interact with in order to see temperature data from the server.
+
+Once a connection is made to the server, the client can look at real-time temperature data (with graphing option) or request a graphical history of past temperature data.
+
+Please select a sub-category to learn more.
