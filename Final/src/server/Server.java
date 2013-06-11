@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketImpl;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -16,10 +17,9 @@ import java.util.concurrent.Future;
 
 public class Server implements Runnable {
 	
-	// Change this number to a different number
-	// if unable to connect to the server
-	// BE SURE TO UPDATE PORT FORWARDING
-	private final int PORT_NUMBER = 61223;
+	private static final int MAX_PORT = 65535;
+
+	private static int portNumber;  // A commandline arg, in eclipse go to menu bar->run->run configuration, go to server and commandline args, put port number
 
 	private static int MAX_CLIENT_TIMEOUT = 20000;   // Timeout 20 seconds
 	private static Queue<String> tempQueue = null;
@@ -38,19 +38,24 @@ public class Server implements Runnable {
 	private BufferedWriter bf = null;   // same
 
 	public static void main(String[] args) throws IOException {
+		try {
+			setPortNumber(args[0]);
+		} catch (Exception e) {
+			System.out.println("Invalid port number. Please enter a valid port number (non-negative integer). Exiting.");
+			System.exit(0);
+		}
 		server = new Thread(new Server(), "Server-Run");
 		server.run();
 		System.out.println("closed");
 	}
 
-
 	// Send data to client, listen for updates, etc.
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(PORT_NUMBER);
+			serverSocket = new ServerSocket(getPortNumber());
 			while (true) {
 				disconnected = false;
-				System.out.println("Waiting for client");
+				System.out.println("Waiting for client on port " + getPortNumber());
 				// Wait for a client to connect
 				clientSocket = serverSocket.accept();
 				System.out.println("Client Connected");
@@ -150,6 +155,19 @@ public class Server implements Runnable {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private static int getPortNumber() {
+		return portNumber;
+	}
+	
+	private static void setPortNumber(String s) throws Exception {
+		int port = Integer.parseInt(s);
+		if (port < 1 || port > MAX_PORT) {
+			throw new Exception("Invalid port number");
+		} else {
+			portNumber = port;
 		}
 	}
 }
