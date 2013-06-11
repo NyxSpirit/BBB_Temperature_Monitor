@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 /**
  * Sensor is used for reading data from the BeagleBone Black.
  * <br><br>
- * NOTE: This class uses random values to illustrate real-time temperature data. This is for those who do not possess a BeagleBone Black.
  * @author Nick
  *
  */
@@ -108,6 +107,13 @@ public class Sensor implements Runnable {
 		}	
 	}
 
+	/**
+	 * Code From http://www.mcu-turkey.com/beaglebone-tmp102-sicaklik-sensoru-ile-i2c-java-haberlesme-uygulamasi/
+	 * 
+	 * @return - Temperature as a float value
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	private float getTempI2C() throws IOException, InterruptedException {
 
 		Process p=Runtime.getRuntime().exec("i2cget -y 0 0x48 0x00 w"); //shell command
@@ -120,6 +126,7 @@ public class Sensor implements Runnable {
 
 		String okunanDeger = bufci.readLine(); //"0x110B"
 		float sabitDeger = (float) 0.0625; // Constant to multiply by to get result
+		@SuppressWarnings("unused")
 		char[] stringArray;// holds bits
 		stringArray = okunanDeger.toCharArray();
 
