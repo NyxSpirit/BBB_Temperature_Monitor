@@ -116,31 +116,30 @@ public class Sensor implements Runnable {
 	 */
 	private float getTempI2C() throws IOException, InterruptedException {
 
-		Process p=Runtime.getRuntime().exec("i2cget -y 0 0x48 0x00 w"); //shell command
+		Process p=Runtime.getRuntime().exec("i2cget -y 1 0x49 0x00 w"); //shell command
 		p.waitFor();
-		if (p.exitValue() != 0) {
-			return -1;
-		}
-		InputStreamReader in = new InputStreamReader(p.getInputStream());
-		BufferedReader bufci = new BufferedReader(in);
 
-		String okunanDeger = bufci.readLine(); //"0x110B"
-		float sabitDeger = (float) 0.0625; // Constant to multiply by to get result
+		InputStreamReader in = new InputStreamReader(p.getInputStream());
+		BufferedReader br = new BufferedReader(in);
+
+		String readVal = br.readLine(); //"0x110B"
+		float constVal = (float) 0.0625; // Constant to multiply by to get result
 		@SuppressWarnings("unused")
 		char[] stringArray;// holds bits
-		stringArray = okunanDeger.toCharArray();
+		stringArray = readVal.toCharArray();
 
-		String cikis = "";
-		char ca = okunanDeger.charAt(4);
-		cikis = Character.toString(ca);
-		cikis = cikis + okunanDeger.charAt(5);
-		cikis = cikis + okunanDeger.charAt(2);
-		cikis = cikis + okunanDeger.charAt(3);
+		String out = "";
+		char ca = readVal.charAt(4);
+		out = Character.toString(ca);
+		out = out + readVal.charAt(5);
+		out = out + readVal.charAt(2);
+		out = out + readVal.charAt(3);
 
-		int cikisInt = Integer.parseInt(cikis.trim(),16);
-		cikisInt = cikisInt >> 4; // Shift bits by 4
-
-		return convertToF(cikisInt * sabitDeger); // Multiply by constant to get temp
+		int outInt = Integer.parseInt(out.trim(),16);
+		outInt = outInt >> 4; // Shift bits by 4
+		br.close();
+		in.close();
+		return convertToF(outInt * constVal); 
 	}
 	
 	/**
