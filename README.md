@@ -1,4 +1,4 @@
-Final-Project
+BeagleBone Black Temperature Monitor
 =============
 
 Final Project for Java 143
