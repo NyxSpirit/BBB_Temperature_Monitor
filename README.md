@@ -14,3 +14,4 @@ The Client application receives the data sent from the Server application, allow
 =============
 
 *The ability to graph a time chart displaying temperature versus time has not yet been implemented. Client/Server interaction works over the internet with port-forwarding.
+**Dependencies: JFreeChart http://www.jfree.org/jfreechart/ for graphs.
